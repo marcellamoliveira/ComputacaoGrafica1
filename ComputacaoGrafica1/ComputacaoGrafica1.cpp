@@ -1,20 +1,56 @@
-// ComputacaoGrafica1.cpp : Este arquivo contém a função 'main'. A execução do programa começa e termina ali.
-//
+#include "raylib.h"
+#include "funcoes_utilitarias.cpp"
 
-#include <iostream>
+//O olho do pintor está na origem do sistema de coordenadas(0, 0, 0)
 
-int main()
-{
-    std::cout << "Hello World!\n";
+
+// dimensões da janela
+float wJanela = 100;
+float hJanela = 100;
+ 
+//distância do olho até a janela 
+float dJanela = 2;
+
+//raio da esfera 
+float rEsfera = 5;
+
+
+// centro da esfera  - O centro da esfera deve estar sobre o eixo z com coordenada z < -(dJanela + rEsfera)
+vetor centro_esfera = { 0.0, 0.0, -(dJanela + rEsfera) };
+
+// cor da esfera    / A cor da esfera deve ser esfColor = 255, 0, 0
+vetor esfColor = { 255.0, 0.0, 0.0 };
+
+// cor do background  -  A cor de background deve ser cinza bgColor = 100, 100, 100
+vetor bgColor = { 100.0, 100.0, 100.0 };
+
+
+
+//o número de colunas
+int nCol = 10;
+
+
+//número de linhas
+int nLin = 10;
+ /*Note que
+O loop aninhado mais externo é o loop de linhas que vai de 0 até nLin - 1.  ( for int l = 0; l < nLin; l++)
+O loop aninhado mais interno é o loop de colunas que vai de 0 até nCol -1  (for int c =0; c < nCol; c++)
+
+As dimensões dos retângulos da tela de mosquito são:
+Dx = wJanela/nCol
+Dy = hJanela/nLin
+
+As coordenadas do ponto do centro de um retângulo da tela de mosquito correspondente ao retângulo (riscado a lápis) na posição (l, c) é dado por
+
+x = - wJanela/2. + Dx/2  + c*Dx
+y =.  hJanela/2.  -  Dy/2  -  l*Dy
+
+Cada raio (semi reta) parte do olho do pintor E = (0,0, 0) e  passa pelo ponto (x, y, -dJanela).
+
+Caso o raio enviado não tenha interseção com a esfera, armazene a cor de background na posição (l, c) da matriz de cores do Canvas.
+Caso o raio tangencie ou tenha interseção plena com a esfera, armazene a cor da esfera (esfColor) na posição (l, c) da matriz de cores do Canvas.*/
+
+
+int main(void) {
+
 }
-
-// Executar programa: Ctrl + F5 ou Menu Depurar > Iniciar Sem Depuração
-// Depurar programa: F5 ou menu Depurar > Iniciar Depuração
-
-// Dicas para Começar: 
-//   1. Use a janela do Gerenciador de Soluções para adicionar/gerenciar arquivos
-//   2. Use a janela do Team Explorer para conectar-se ao controle do código-fonte
-//   3. Use a janela de Saída para ver mensagens de saída do build e outras mensagens
-//   4. Use a janela Lista de Erros para exibir erros
-//   5. Ir Para o Projeto > Adicionar Novo Item para criar novos arquivos de código, ou Projeto > Adicionar Item Existente para adicionar arquivos de código existentes ao projeto
-//   6. No futuro, para abrir este projeto novamente, vá para Arquivo > Abrir > Projeto e selecione o arquivo. sln

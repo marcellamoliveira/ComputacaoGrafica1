@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ComputacaoGrafica1.cpp">
+    <ClCompile Include="Atividade1.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="funcoes_utilitarias.cpp">
+    <ClCompile Include="funcoes.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="declaracoes.h">
+    <ClInclude Include="funcoes.h">
       <Filter>Arquivos de Origem</Filter>
     </ClInclude>
   </ItemGroup>

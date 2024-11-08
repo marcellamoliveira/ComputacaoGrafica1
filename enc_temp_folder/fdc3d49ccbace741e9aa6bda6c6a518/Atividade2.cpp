@@ -10,6 +10,7 @@ const int hTela = 500;
 const float wJanela = 6.0;
 const float hJanela = 5.0;
 
+
 //o número de colunas/linhas
 const int nCol = 600;
 const int nLin = 500;
@@ -27,29 +28,31 @@ vetor centro_esfera = { 0.0, 0.0, -(dJanela + rEsfera) };
 
 
 
-// I_F = Intensidade da da fonte pontual
-vetor Intensidade_Fonte = { 0.7, 0.7, 0.7 };       
-
-// P_F - Posição da fonte pontual situada a 5 metros acima do olho do observador.
-vetor Posicao_Fonte = { 0.0, 5.0, 0.0 };       
-
-// material da esfera
-const vetor k = { 1.0, 0.0, 0.0 }; 
-
-// Expoente para iluminação especular
-const double specularExponent = 50.0;        
-
-
-
-
-/*// cor da esfera    / A cor da esfera deve ser esfColor = 255, 0, 0
+// cor da esfera    / A cor da esfera deve ser esfColor = 255, 0, 0
 vetor esfColor = { 255.0, 0.0, 0.0 };
 
 // cor do background  -  A cor de background deve ser cinza bgColor = 100, 100, 100
 vetor bgColor = { 100.0, 100.0, 100.0 };
 
 //olho do pintor
-vetor E = { 0.0f, 0.0f, 0.0f };*/
+vetor E = { 0.0f, 0.0f, 0.0f };
+
+
+
+
+// I_F = Intensidade da da fonte pontual
+vetor Intensidade_Fonte = { 0.7, 0.7, 0.7 };       
+
+// P_F - Posição da fonte pontual situada a 5 metros acima do olho do observador.
+vetor Posicao_Fonte = { 0.0, 5.0, 0.0 };       
+
+
+
+// Material da esfera e fonte de luz
+const vetor sphereMaterial = { 1.0, 0.0, 0.0 }; // Cor da esfera
+const double specularExponent = 50.0;           // Expoente para iluminação especular
+
+
 
 
 
@@ -79,20 +82,20 @@ int main() {
         if (IsKeyDown(KEY_H)) centro_esfera.x -= 0.05;
         if (IsKeyDown(KEY_L)) centro_esfera.x += 0.05;
 
-        //ponto superior esquerdo
-        vetor PSE = { -wJanela * 0.5, hJanela * 0.5, -dJanela };
+        // Configuração do ponto superior esquerdo do frame
+        vetor topLeft = { -wJanela * 0.5, hJanela * 0.5, -dJanela };
 
         // Vetor que vai do observador ao centro da esfera
         vetor viewToSphere = vetor_escala(centro_esfera, -1);
 
         BeginDrawing();
-        ClearBackground(Color{ 100, 100, 100, 255 });        //NAOOO SEIII
+        ClearBackground(Color{ 100, 100, 100});
 
+        // Loop sobre as linhas e colunas do frame
         for (int i = 0; i < nLin; ++i) {
-            double yp = PSE.y - dy * 0.5 - i * dy;
+            double yp = topLeft.y - dy * 0.5 - i * dy;
             for (int j = 0; j < nCol; ++j) {
-                double xp = PSE.x + dx * j + dx * 0.5;
-
+                double xp = topLeft.x + dx * j + dx * 0.5;
                 vetor P = { xp, yp, -dJanela };
 
                 // Vetor normalizado do observador até o ponto P
@@ -121,13 +124,13 @@ int main() {
                 vetor reflected = vetor_subtrair(vetor_escala(normal, 2 * vetor_produto(normal, lightDir)), lightDir);
 
                 // Iluminação difusa e especular
-                vetor I_d = vetor_escala(vetor_multiplica(k, Intensidade_Fonte),
+                vetor diffuse = vetor_escala(vetor_multiplica(sphereMaterial, Intensidade_Fonte),
                     maximo(vetor_produto(lightDir, normal), 0));
-                vetor I_e = vetor_escala(vetor_multiplica(k, Intensidade_Fonte),
+                vetor specular = vetor_escala(vetor_multiplica(sphereMaterial, Intensidade_Fonte),
                     maximo(pow(vetor_produto(viewDir, reflected), specularExponent), 0));
 
                 // Intensidade total da luz
-                vetor totalIntensity = vetor_soma(I_d, I_e);
+                vetor totalIntensity = vetor_soma(diffuse, specular);
 
                 // Conversão da intensidade de luz para valores de cor (0-255)
                 Color pixelColor = Color{

@@ -39,3 +39,19 @@ vetor vetor_unitario(const vetor& v) {
     }
     return { 0, 0, 0 };
 }
+
+//encontra o maior
+double maximo(float a, float b) {
+    if (a > b) {
+        return a;
+    }
+    else return b;
+}
+
+//encontrar o menor
+double minimo(float a, float b) {
+    if (a < b) {
+        return a;
+    }
+    else return b;
+}

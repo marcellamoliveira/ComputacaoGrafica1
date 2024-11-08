@@ -13,3 +13,5 @@ vetor vetor_subtrair(const vetor& v1, const vetor& v2);
 vetor vetor_soma(const vetor& v1, const vetor& v2);
 vetor vetor_multiplica(const vetor& v1, const vetor& v2);
 vetor vetor_unitario(const vetor& v);
+double maximo(float a, float b);
+double minimo(float a, float b);

@@ -1,4 +1,4 @@
-#include "raylib.h"
+/*#include "raylib.h"
 #include "funcoes.h"
 #include <math.h>
 
@@ -96,4 +96,4 @@ int main(void) {
         EndDrawing();
     }
     return 0;
-}
+}*/

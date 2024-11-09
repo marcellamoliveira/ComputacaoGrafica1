@@ -26,7 +26,6 @@ vetor centro_esfera = { 0.0, 0.0, -(dJanela + rEsfera) };
 
 
 
-
 // I_F = Intensidade da da fonte pontual
 vetor Intensidade_Fonte = { 0.7, 0.7, 0.7 };       
 
@@ -34,25 +33,10 @@ vetor Intensidade_Fonte = { 0.7, 0.7, 0.7 };
 vetor Posicao_Fonte = { 0.0, 5.0, 0.0 };       
 
 // material da esfera
-const vetor k = { 1.0, 0.0, 0.0 }; 
+const vetor k = { 0.5, 0.0, 0.0 }; 
 
 // Expoente para iluminação especular
-const double specularExponent = 50.0;        
-
-
-
-
-/*// cor da esfera    / A cor da esfera deve ser esfColor = 255, 0, 0
-vetor esfColor = { 255.0, 0.0, 0.0 };
-
-// cor do background  -  A cor de background deve ser cinza bgColor = 100, 100, 100
-vetor bgColor = { 100.0, 100.0, 100.0 };
-
-//olho do pintor
-vetor E = { 0.0f, 0.0f, 0.0f };*/
-
-
-
+const double exp_especular = 10.0;        
 
 
 int main() {
@@ -65,86 +49,86 @@ int main() {
     double dx = wJanela / nCol;
     double dy = hJanela / nLin;
 
-    // Tamanho dos retângulos na janela para cada ponto do frame
-    int pixelWidth = wTela / nCol;
-    int pixelHeight = hTela / nLin;
+    //tamanho dos retângulos na janela para cada ponto do frame
+    int wPixel = wTela / nCol;
+    int hPixel = hTela / nLin;
 
-    // Loop principal de renderização
+  
     while (!WindowShouldClose()) {
-        // Controle de movimentação da esfera e ajuste da distância do frame
-        if (IsKeyDown(KEY_W)) dJanela += 0.05;
-        if (IsKeyDown(KEY_S) && dJanela > 0.10) dJanela -= 0.05;
-        if (IsKeyDown(KEY_J)) centro_esfera.y += 0.05;
-        if (IsKeyDown(KEY_K)) centro_esfera.y -= 0.05;
-        if (IsKeyDown(KEY_H)) centro_esfera.x -= 0.05;
-        if (IsKeyDown(KEY_L)) centro_esfera.x += 0.05;
-
         //ponto superior esquerdo
         vetor PSE = { -wJanela * 0.5, hJanela * 0.5, -dJanela };
 
-        // Vetor que vai do observador ao centro da esfera
-        vetor viewToSphere = vetor_escala(centro_esfera, -1);
+        // do observador até o centro da esfera
+        vetor distancia = vetor_escala(centro_esfera, -1);
 
         BeginDrawing();
-        ClearBackground(Color{ 100, 100, 100, 255 });        //NAOOO SEIII
+        ClearBackground(Color{ 100, 100, 100 });        
 
         for (int i = 0; i < nLin; ++i) {
             double yp = PSE.y - dy * 0.5 - i * dy;
+
             for (int j = 0; j < nCol; ++j) {
                 double xp = PSE.x + dx * j + dx * 0.5;
 
                 vetor P = { xp, yp, -dJanela };
 
-                // Vetor normalizado do observador até o ponto P
+                // vetor normalizado do observador até o ponto P
                 vetor dr = vetor_unitario(P);
 
-                // Coeficientes da equação quadrática para interseção com a esfera
+                //coeficientes de bhaskara
                 double a = vetor_produto(dr, dr);
-                double b = 2 * vetor_produto(dr, viewToSphere);
-                double c = vetor_produto(viewToSphere, viewToSphere) - rEsfera * rEsfera;
-                double discriminant = b * b - 4 * a * c;
+                double b = 2 * vetor_produto(dr, distancia);
+                double c = vetor_produto(distancia, distancia) - rEsfera * rEsfera;
+                double delta = b * b - 4 * a * c;
 
-                // Verificação de interseção com a esfera
-                if (discriminant < 0.0) continue;
+                // verificação de interseção com a esfera
+                if (delta < 0.0) continue;
+                double raiz = (-b - sqrt(delta)) / (2 * a);
+                if (raiz < 0.0) { raiz = (-b + sqrt(delta)) / (2 * a); };
+                if (raiz < 0.0) continue;
 
-                double t = (-b - sqrt(discriminant)) / (2 * a);
-                if (t < 0.0) t = (-b + sqrt(discriminant)) / (2 * a);
-                if (t < 0.0) continue;
 
-                // Ponto de interseção e normal no ponto
-                vetor intersection = vetor_escala(dr, t);
-                vetor normal = vetor_unitario(vetor_subtrair(intersection, centro_esfera));
 
-                // Cálculo dos vetores para iluminação
-                vetor viewDir = vetor_escala(dr, -1);
-                vetor lightDir = vetor_unitario(vetor_subtrair(Posicao_Fonte, intersection));
-                vetor reflected = vetor_subtrair(vetor_escala(normal, 2 * vetor_produto(normal, lightDir)), lightDir);
+                // interseção do vetor dr até a esfera, obtendo as coordenadas da intersecção
+                vetor interseccao = vetor_escala(dr, raiz);
 
-                // Iluminação difusa e especular
-                vetor I_d = vetor_escala(vetor_multiplica(k, Intensidade_Fonte),
-                    maximo(vetor_produto(lightDir, normal), 0));
-                vetor I_e = vetor_escala(vetor_multiplica(k, Intensidade_Fonte),
-                    maximo(pow(vetor_produto(viewDir, reflected), specularExponent), 0));
+                //vetor normal apartir da intersecção
+                vetor normal = vetor_unitario(vetor_subtrair(interseccao, centro_esfera));
 
-                // Intensidade total da luz
-                vetor totalIntensity = vetor_soma(I_d, I_e);
+                // inversão da direção da intersecção para o observador
+                vetor vetor_invertido = vetor_escala(dr, -1);
 
-                // Conversão da intensidade de luz para valores de cor (0-255)
+                // aponta da intersecção para a fonte de luz(Posicao_Fonte)
+                vetor fonte_invertida = vetor_unitario(vetor_subtrair(Posicao_Fonte, interseccao));
+
+                //luz refletida no ponto de intersecção
+                vetor refletido = vetor_subtrair(vetor_escala(normal, 2 * vetor_produto(normal, fonte_invertida)), fonte_invertida);
+
+                // I_d - reflexão difusa
+                vetor I_difusa = vetor_escala(vetor_multiplica( Intensidade_Fonte, k), maximo(vetor_produto(fonte_invertida, normal), 0));
+
+                //  I_e - reflexão especular >> brilho refletido na intersecção
+                vetor I_especular = vetor_escala(vetor_multiplica( Intensidade_Fonte, k), maximo(pow(vetor_produto(vetor_invertido, refletido), exp_especular), 0));
+
+                // intensidade total da luz
+                vetor IntensidadeTotal = vetor_soma(I_difusa, I_especular);
+
+                //cálculo da intensidade de luz para valores de cor (0-255)
                 Color pixelColor = Color{
-                    static_cast<unsigned char>(minimo(totalIntensity.x * 255.0, 255.0)),
-                    static_cast<unsigned char>(minimo(totalIntensity.y * 255.0, 255.0)),
-                    static_cast<unsigned char>(minimo(totalIntensity.z * 255.0, 255.0)),
-                    255
+                    static_cast<unsigned char>(minimo(IntensidadeTotal.x * 255.0, 255.0)),
+                    static_cast<unsigned char>(minimo(IntensidadeTotal.y * 255.0, 255.0)),
+                    static_cast<unsigned char>(minimo(IntensidadeTotal.z * 255.0, 255.0)),
+                    255  
                 };
 
-                // Desenho do pixel
-                DrawRectangle(pixelWidth * j, pixelHeight * i, pixelWidth, pixelHeight, pixelColor);
+                //pintando o pixel
+                DrawRectangle(wPixel * j, hPixel * i, wPixel, hPixel, pixelColor);
             }
         }
 
         EndDrawing();
     }
 
-    CloseWindow();
+    CloseWindow();  //fechar a janela
     return 0;
 }

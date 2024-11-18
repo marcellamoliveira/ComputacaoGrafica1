@@ -33,4 +33,18 @@ vetor luz_e_sombra(
     const vetor& ponto_chao,
     const vetor& normal_chao,
     const vetor& ponto_fundo,
-    const vetor& normal_fundo);
+    const vetor& normal_fundo, 
+    const vetor& centrob_cilindro,
+    float rb_cilindro, 
+    float hCilindro, 
+    const vetor& d_cil,
+    const vetor& centrob_cone, 
+    float rb_cone, 
+    float hCone, 
+    const vetor& d_cone
+
+);
+
+
+bool IntersecaoCilindro(const vetor& origem, const vetor& dr, double& distancia, const vetor& centrob_cone, float rb_cilindro, float hCilindro, const vetor& direcao);
+bool IntersecaoCone(const vetor& origem, const vetor& dr, double& distancia, const vetor& centrob_cone, float rb_cone, float hCone, const vetor& direcao);

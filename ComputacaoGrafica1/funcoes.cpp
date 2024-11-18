@@ -72,6 +72,68 @@ bool IntersecaoEsfera(const vetor& origem, const vetor& dr, double& distancia, c
     return distancia > 0.0;
 }
 
+
+
+bool IntersecaoCilindro(const vetor& origem, const vetor& dr, double& distancia, const vetor& centrob_cilindro, float rb_cilindro, float hCilindro, const vetor& direcao) {
+    vetor oc = vetor_subtrair(origem, centrob_cilindro);
+
+    float a = vetor_produto(dr, dr) - pow(vetor_produto(dr, direcao), 2);
+    float b = 2 * (vetor_produto(dr, oc) - vetor_produto(dr, direcao) * vetor_produto(oc, direcao));
+    float c = vetor_produto(oc, oc) - pow(vetor_produto(oc, direcao), 2) - rb_cilindro * rb_cilindro;
+
+    double delta = b * b - 4 * a * c;
+    if (delta < 0) return false;
+
+    double t1 = (-b - sqrt(delta)) / (2 * a);
+    double t2 = (-b + sqrt(delta)) / (2 * a);
+
+    double t = t1 > 0 ? t1 : t2;
+    vetor ponto_interseccao = vetor_soma(origem, vetor_escala(dr, t));
+    float distancia_alongamento = vetor_produto(vetor_subtrair(ponto_interseccao, centrob_cilindro), direcao);
+
+    if (distancia_alongamento >= 0 && distancia_alongamento <= hCilindro) {
+        distancia = t;
+        return true;
+    }
+    return false;
+}
+
+
+
+
+bool IntersecaoCone(const vetor& origem, const vetor& dr, double& distancia, const vetor& centrob_cone, float rb_cone, float hCone, const vetor& direcao) {
+        vetor oc = vetor_subtrair(origem, centrob_cone);
+        float cos_theta = hCone / sqrt(hCone * hCone + rb_cone * rb_cone);
+        float cos_theta2 = cos_theta * cos_theta;
+
+        vetor direcao_normalizada = vetor_unitario(direcao);
+
+        float d_dot_v = vetor_produto(dr, direcao_normalizada);
+        float oc_dot_v = vetor_produto(oc, direcao_normalizada);
+
+        float a = vetor_produto(dr, dr) - cos_theta2 * d_dot_v * d_dot_v;
+        float b = 2 * (vetor_produto(dr, oc) - cos_theta2 * d_dot_v * oc_dot_v);
+        float c = vetor_produto(oc, oc) - cos_theta2 * oc_dot_v * oc_dot_v;
+
+        double delta = b * b - 4 * a * c;
+        if (delta < 0) return false;
+
+        double t1 = (-b - sqrt(delta)) / (2 * a);
+        double t2 = (-b + sqrt(delta)) / (2 * a);
+
+        double t = t1 > 0 ? t1 : t2;
+        if (t < 0) return false;
+        vetor ponto_interseccao = vetor_soma(origem, vetor_escala(dr, t));
+        float distancia_alongamento = vetor_produto(vetor_subtrair(ponto_interseccao, centrob_cone), direcao_normalizada);
+
+        if (distancia_alongamento >= 0 && distancia_alongamento <= hCone) {
+            distancia = t;
+            return true;
+        }
+        return false;
+}
+
+
 // função para interseção com um plano
 bool IntersecaoPlano(const vetor& origem, const vetor& dr, const vetor& ponto, const vetor& normal, double& distancia) {
     double produto = vetor_produto(dr, normal);
@@ -82,7 +144,6 @@ bool IntersecaoPlano(const vetor& origem, const vetor& dr, const vetor& ponto, c
     }
     return false;
 }
-
 
 // cálculo da direção da reflexão apartir da normal
 vetor vetor_reflexao(const vetor& L, const vetor& normal) {
@@ -105,7 +166,15 @@ vetor luz_e_sombra(
     const vetor& ponto_chao,
     const vetor& normal_chao,
     const vetor& ponto_fundo,
-    const vetor& normal_fundo) {
+    const vetor& normal_fundo,
+    const vetor& centrob_cilindro,
+    float rb_cilindro,
+    float hCilindro,
+    const vetor& d_cil,
+    const vetor& centrob_cone,
+    float rb_cone,
+    float hCone,
+    const vetor& d_cone) {
 
     vetor Intensidade_Fonte = { 0.7, 0.7, 0.7 };
     vetor Posicao_Fonte = { 0.0, 60.0, -30.0 };
@@ -118,10 +187,15 @@ vetor luz_e_sombra(
     vetor I_especular = { 0.0, 0.0, 0.0 };
 
     double t_sombra_esfera = INFINITY;
+    double t_sombra_cilindro = INFINITY;
+    double t_sombra_cone = INFINITY;
 
     bool sombra_esfera = IntersecaoEsfera(interseccao, L, t_sombra_esfera, centro_esfera, rEsfera) && t_sombra_esfera > 0.001;
+    bool sombra_cilindro = IntersecaoCilindro(interseccao, L, t_sombra_cilindro, centrob_cilindro, rb_cilindro, hCilindro, d_cil) && t_sombra_cilindro > 0.001;
+    bool sombra_cone = IntersecaoCone(interseccao, L, t_sombra_cone, centrob_cone, rb_cone, hCone, d_cone) && t_sombra_cone > 0.001;
    
-    if (!sombra_esfera) {
+    //se a intersecç~~ao nao tiver
+    if (!sombra_esfera && !sombra_cilindro && !sombra_cone ) {
         //componente difusa
         double cos_theta = maximo(vetor_produto(normal, L), 0.0);
         I_difusa = vetor_multiplica(k_d, vetor_escala(Intensidade_Fonte, cos_theta));

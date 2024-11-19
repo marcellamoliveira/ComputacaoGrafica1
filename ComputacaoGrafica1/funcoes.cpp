@@ -1,5 +1,6 @@
 #include "funcoes.h"
 #include <cmath>
+#include <iostream>
 
 // Calcula o tamanho do vetor
 float vetor_tamanho(const vetor& v) {
@@ -75,6 +76,14 @@ bool IntersecaoEsfera(const vetor& origem, const vetor& dr, double& distancia, c
 
 
 bool IntersecaoCilindro(const vetor& origem, const vetor& dr, double& distancia, const vetor& centrob_cilindro, float rb_cilindro, float hCilindro, const vetor& direcao) {
+    /*vetor w = vetor_subtrair(dr, vetor_multiplica(dr, vetor_multiplica(direcao, direcao)));
+    vetor oc = vetor_subtrair(origem, centrob_cilindro);
+    vetor v = vetor_subtrair(oc, vetor_multiplica(oc, vetor_multiplica(direcao, direcao)));
+
+    float a = vetor_tamanho(vetor_multiplica(w, w));
+    float b = vetor_tamanho(vetor_multiplica(w, w));
+    float c = vetor_tamanho(vetor_multiplica(v,v)) - rb_cilindro*rb_cilindro;*/
+    
     vetor oc = vetor_subtrair(origem, centrob_cilindro);
 
     float a = vetor_produto(dr, dr) - pow(vetor_produto(dr, direcao), 2);
@@ -107,15 +116,17 @@ bool IntersecaoCone(const vetor& origem, const vetor& dr, double& distancia, con
         float cos_theta2 = cos_theta * cos_theta;
 
         vetor direcao_normalizada = vetor_unitario(direcao);
+        vetor dr_novo = vetor_unitario(dr);
 
-        float d_dot_v = vetor_produto(dr, direcao_normalizada);
+        float d_dot_v = vetor_produto(dr_novo, direcao_normalizada);
         float oc_dot_v = vetor_produto(oc, direcao_normalizada);
 
-        float a = vetor_produto(dr, dr) - cos_theta2 * d_dot_v * d_dot_v;
-        float b = 2 * (vetor_produto(dr, oc) - cos_theta2 * d_dot_v * oc_dot_v);
+        float a = vetor_produto(dr_novo, dr_novo) - cos_theta2 * d_dot_v * d_dot_v;
+        float b = 2 * (vetor_produto(dr_novo, oc) - cos_theta2 * d_dot_v * oc_dot_v);
         float c = vetor_produto(oc, oc) - cos_theta2 * oc_dot_v * oc_dot_v;
 
         double delta = b * b - 4 * a * c;
+        //std::cout << "a" << a << ", b " << b << "c   " << c << "delta   " << delta << "\n";
         if (delta < 0) return false;
 
         double t1 = (-b - sqrt(delta)) / (2 * a);
@@ -123,16 +134,15 @@ bool IntersecaoCone(const vetor& origem, const vetor& dr, double& distancia, con
 
         double t = t1 > 0 ? t1 : t2;
         if (t < 0) return false;
-        vetor ponto_interseccao = vetor_soma(origem, vetor_escala(dr, t));
+        vetor ponto_interseccao = vetor_soma(origem, vetor_escala(dr_novo, t));
         float distancia_alongamento = vetor_produto(vetor_subtrair(ponto_interseccao, centrob_cone), direcao_normalizada);
 
-        if (distancia_alongamento >= 0 && distancia_alongamento <= hCone) {
+        if (distancia_alongamento >-1e-6 && distancia_alongamento <= hCone + 1e-6) {
             distancia = t;
             return true;
         }
         return false;
 }
-
 
 // função para interseção com um plano
 bool IntersecaoPlano(const vetor& origem, const vetor& dr, const vetor& ponto, const vetor& normal, double& distancia) {
@@ -195,7 +205,7 @@ vetor luz_e_sombra(
     bool sombra_cone = IntersecaoCone(interseccao, L, t_sombra_cone, centrob_cone, rb_cone, hCone, d_cone) && t_sombra_cone > 0.001;
    
     //se a intersecç~~ao nao tiver
-    if (!sombra_esfera && !sombra_cilindro && !sombra_cone ) {
+    if (!sombra_esfera && !sombra_cilindro && !sombra_cone) {
         //componente difusa
         double cos_theta = maximo(vetor_produto(normal, L), 0.0);
         I_difusa = vetor_multiplica(k_d, vetor_escala(Intensidade_Fonte, cos_theta));
@@ -209,9 +219,6 @@ vetor luz_e_sombra(
 
     return vetor_soma(I_ambiente, vetor_soma(I_difusa, I_especular));
 }
-
-
-
 
 
 

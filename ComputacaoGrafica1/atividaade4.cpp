@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include "funcoes.h"
 #include <cmath>
+#include <iostream>
 
 // tela/canvas
 const int wTela = 500;
@@ -33,15 +34,15 @@ const vetor normal_fundo = { 0.0, 0.0, 1.0 };
 const vetor centrob_cilindro = { 0, 0, -100 };
 const float rb_cilindro = (1.0 / 3.0)* 40;
 const float hCilindro = 120.0;
-const vetor d_cil = { -1 / sqrt(3), 1 / sqrt(3), -1 / sqrt(3) };     //Vetor - direção do cilindro d_cil = (-1 / sqrt(3), 1 / sqrt(3), -1 / sqrt(3))
+const vetor d_cil = { -1 / sqrt(3), 1 / sqrt(3), - 1 / sqrt(3) };     //Vetor - direção do cilindro d_cil = (-1 / sqrt(3), 1 / sqrt(3), -1 / sqrt(3))
 const vetor K_cilindro = { 0.2, 0.3, 0.8 };
 
-
+vetor centro_topo_esfera = vetor_soma(centro_esfera, {0.0, 0.0, rEsfera});
 const vetor centrob_cone = vetor_soma(centrob_cilindro, vetor_escala(d_cil, hCilindro));
 //Centro da base localizado no centro do topo do cilindro
 const float rb_cone = 60.0;
 const float hCone = 20.0;
-const vetor d_cone = d_cil;
+const vetor d_cone = {0.0f, -1.0f, 0.0f};
 const vetor K_cone = { 0.8, 0.3, 0.2 };
 
 int main() {
@@ -140,6 +141,12 @@ int main() {
                     exp_especular = 10.0;
                 }
 
+                /*if (intersecaoCone) {
+                    std::cout << "s" << distancia_cone << "\n";
+                }
+                else {
+                    std::cout << "n";
+                }*/
                 if (interseccao_minima < INFINITY) {
                     vetor cor = luz_e_sombra(
                         interseccao, normal, dr_invertido, k_d, k_a, k_e, exp_especular, centro_esfera, rEsfera, ponto_chao, normal_chao, ponto_fundo, normal_fundo, centrob_cilindro, rb_cilindro, hCilindro, d_cil, centrob_cone, rb_cone, hCone, d_cone

@@ -46,7 +46,7 @@ const vetor d_cone = {0.0f, -1.0f, 0.0f};
 const vetor K_cone = { 0.8, 0.3, 0.2 };
 
 int main() {
-    InitWindow(wTela, hTela, "Atividade 4");
+    InitWindow(wTela, hTela, "Atividade 3");
     SetTargetFPS(60);
 
     double dx = wJanela / nCol;
